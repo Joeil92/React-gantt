@@ -7,7 +7,7 @@ const tasks = [
     startDate: '2023-01-01',
     endDate: '2023-01-05',
     color: '#00ff00',
-    progression: 0.5,
+    progression: 0,
   },
 ]
 

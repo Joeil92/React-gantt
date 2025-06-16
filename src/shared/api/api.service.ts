@@ -18,5 +18,7 @@ export function createTask(taskDto: TaskDto) {
 }
 
 export function getTasks() {
-  return tasks
+  return {
+    data: tasks,
+  }
 }
