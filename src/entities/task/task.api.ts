@@ -12,4 +12,4 @@ const tasks: Task[] = [
   },
 ]
 
-export default { data: tasks }
+export default tasks

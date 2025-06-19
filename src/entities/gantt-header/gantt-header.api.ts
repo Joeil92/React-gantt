@@ -39,4 +39,4 @@ const ganttHeaders: GanttHeader[] = [
   },
 ]
 
-export default { data: ganttHeaders }
+export default ganttHeaders
