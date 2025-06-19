@@ -1,6 +1,7 @@
 import { v4 as uuidv4 } from 'uuid'
+import type { Task } from './task.types'
 
-const tasks = [
+const tasks: Task[] = [
   {
     id: uuidv4(),
     title: 'Task 1',
@@ -11,4 +12,4 @@ const tasks = [
   },
 ]
 
-export default tasks
+export default { data: tasks }
