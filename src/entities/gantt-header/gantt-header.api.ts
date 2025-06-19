@@ -1,38 +1,37 @@
 import type { GanttHeader } from './gantt-header.types'
-import { v4 as uuidv4 } from 'uuid'
 
 const ganttHeaders: GanttHeader[] = [
   {
-    id: uuidv4(),
     label: 'Titre',
+    field: 'title',
     type: 'string',
     isVisible: true,
     isEditable: true,
   },
   {
-    id: uuidv4(),
     label: 'Début',
+    field: 'startDate',
     type: 'date',
     isVisible: true,
     isEditable: true,
   },
   {
-    id: uuidv4(),
     label: 'Fin',
+    field: 'endDate',
     type: 'date',
     isVisible: true,
     isEditable: true,
   },
   {
-    id: uuidv4(),
     label: 'Durée',
+    field: 'duration',
     type: 'number',
     isVisible: true,
     isEditable: true,
   },
   {
-    id: uuidv4(),
     label: 'Progression',
+    field: 'progress',
     type: 'number',
     isVisible: true,
     isEditable: true,
