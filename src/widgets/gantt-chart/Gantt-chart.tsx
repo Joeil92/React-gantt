@@ -18,6 +18,7 @@ import {
   SortableContext,
 } from '@dnd-kit/sortable'
 import { useState } from 'react'
+import { restrictToHorizontalAxis } from '@dnd-kit/modifiers'
 
 type GanttChartProps = {
   tasks: Task[]
@@ -76,6 +77,7 @@ function TableGanttChart(props: GanttChartProps) {
     <div className="flex items-center justify-between">
       <DndContext
         sensors={sensors}
+        modifiers={[restrictToHorizontalAxis]}
         onDragStart={handleDragStart}
         onDragEnd={handleDragEnd}
       >
