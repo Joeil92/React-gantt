@@ -19,6 +19,7 @@ import {
 } from '@dnd-kit/sortable'
 import { useState } from 'react'
 import { restrictToHorizontalAxis } from '@dnd-kit/modifiers'
+import { NewHeaderGantt } from '../../features/gantt/new-header-gantt/New-header-gantt'
 
 type GanttChartProps = {
   tasks: Task[]
@@ -91,6 +92,7 @@ function TableGanttChart(props: GanttChartProps) {
             ) : null
           )}
         </SortableContext>
+        <NewHeaderGantt headers={headers} onHeadersChange={setHeaders} />
         <DragOverlay>
           {activeHeader ? (
             <HeaderGantt

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import userEvent from '@testing-library/user-event'
-import { renderWithProviders } from '../../../shared/lib/test/test.lib'
+import { renderWithProviders } from '../../../shared/lib/test/Test.lib'
 import { getGanttHeaders } from '../../../shared/api/api.service'
 import { HeaderGantt } from './Header-gantt.ui'
 import { screen } from '@testing-library/dom'

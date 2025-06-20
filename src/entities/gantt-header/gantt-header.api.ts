@@ -36,6 +36,20 @@ const ganttHeaders: GanttHeader[] = [
     isVisible: true,
     isEditable: true,
   },
+  {
+    label: 'Prédécesseur',
+    field: 'predecessor',
+    type: 'string',
+    isVisible: false,
+    isEditable: true,
+  },
+  {
+    label: 'Successeur',
+    field: 'successor',
+    type: 'string',
+    isVisible: false,
+    isEditable: true,
+  },
 ]
 
 export default ganttHeaders

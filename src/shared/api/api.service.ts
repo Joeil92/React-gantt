@@ -29,3 +29,15 @@ export function getGanttHeaders() {
     data: ganttHeaders,
   }
 }
+
+export function updateGanttHeaderVisibility(field: string, isVisible: boolean) {
+  const header = ganttHeaders.find((header) => header.field === field)
+  if (!header) return { data: [] }
+
+  header.isVisible = isVisible
+  // const updatedHeaders = ganttHeaders.map((header) =>
+  //   header.field === field ? { ...header, isVisible: isVisible } : header
+  // )
+  // console.log(ganttHeaders)
+  return { data: ganttHeaders }
+}
