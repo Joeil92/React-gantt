@@ -1,27 +1,6 @@
 import clsx from 'clsx'
-import {
-  createContext,
-  useContext,
-  useEffect,
-  useRef,
-  useState,
-  type PropsWithChildren,
-} from 'react'
-
-type DropdownContext = {
-  isOpen: boolean
-  toggle: () => void
-}
-const DropdownContext = createContext<DropdownContext>({
-  isOpen: false,
-  toggle: () => {},
-})
-
-function useDropdown() {
-  const context = useContext(DropdownContext)
-  if (!context) throw new Error('useDropdown must be used within a Dropdown')
-  return context
-}
+import { useEffect, useRef, useState, type PropsWithChildren } from 'react'
+import { DropdownContext, useDropdown } from './dropdown.lib'
 
 type DropdownProps = {
   defaultOpen?: boolean
