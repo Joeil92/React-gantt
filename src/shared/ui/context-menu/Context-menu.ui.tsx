@@ -38,7 +38,12 @@ function ContextMenu({ children }: React.PropsWithChildren) {
   )
 }
 
-function ContextMenuToggle({ children }: React.PropsWithChildren) {
+function ContextMenuToggle({
+  children,
+  ...props
+}: React.PropsWithChildren<
+  React.DetailedHTMLProps<React.HTMLAttributes<HTMLDivElement>, HTMLDivElement>
+>) {
   const { handleOpen, handlePosition } = useContextMenu()
 
   const handleContextMenu = (
@@ -49,7 +54,11 @@ function ContextMenuToggle({ children }: React.PropsWithChildren) {
     handlePosition({ x: e.clientX, y: e.clientY })
   }
 
-  return <div onContextMenu={handleContextMenu}>{children}</div>
+  return (
+    <div onContextMenu={handleContextMenu} {...props}>
+      {children}
+    </div>
+  )
 }
 
 function ContextMenuList({ children }: React.PropsWithChildren) {
