@@ -2,11 +2,22 @@ import { Filter } from 'lucide-react'
 import type { GanttHeader } from '../../../entities/gantt-header/gantt-header.types'
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
+import { ResizableContainer } from '../../../shared/ui/resizable-container/Resizable-container.ui'
 
 type HeaderGanttProps = {
   header: GanttHeader
+  isResizing?: boolean
+  onResizingChange?: (isResizing: boolean) => void
+  headers: GanttHeader[]
+  onHeadersChange: (headers: GanttHeader[]) => void
 }
-export function HeaderGantt({ header }: HeaderGanttProps) {
+export function HeaderGantt({
+  header,
+  isResizing,
+  onResizingChange,
+  headers,
+  onHeadersChange,
+}: HeaderGanttProps) {
   const {
     attributes,
     listeners,
@@ -21,24 +32,40 @@ export function HeaderGantt({ header }: HeaderGanttProps) {
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
-    ...(isDragging && {
-      opacity: 0.5,
-    }),
+    ...(isDragging &&
+      !isResizing && {
+        opacity: 0.5,
+      }),
+    width: header.width,
+  }
+
+  const onResize = (width: number) => {
+    const updatedHeaders = headers.map((h) =>
+      h.field === header.field ? { ...header, width } : h
+    )
+    onHeadersChange(updatedHeaders)
   }
 
   return (
     <div
-      key={header.field}
-      className="border-grey-100 group hover:bg-grey-100 flex flex-1 cursor-pointer items-center justify-between border-y p-4 text-[16px] leading-[24px] font-semibold first:border-s last:border-e"
+      className="border-grey-100 group hover:bg-grey-100 cursor-pointer border-y text-[16px] leading-[24px] font-semibold first:border-s last:border-e"
       ref={setNodeRef}
       style={style}
       {...attributes}
       {...listeners}
     >
-      {header.label}
-      <span className="text-grey-500 invisible group-hover:visible">
-        <Filter className="h-4 w-4" />
-      </span>
+      <ResizableContainer
+        childrenClassName="flex items-center gap-4 justify-between p-4"
+        minWidth={100}
+        onResize={onResize}
+        onResizeStart={() => onResizingChange?.(true)}
+        onResizeEnd={() => onResizingChange?.(false)}
+      >
+        <span>{header.label}</span>
+        <span className="text-grey-500 invisible group-hover:visible">
+          <Filter className="h-4 w-4" />
+        </span>
+      </ResizableContainer>
     </div>
   )
 }

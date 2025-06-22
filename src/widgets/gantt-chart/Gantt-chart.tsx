@@ -1,12 +1,9 @@
 import {
   DndContext,
-  DragOverlay,
   MouseSensor,
   useSensor,
   useSensors,
   type DragEndEvent,
-  type DragStartEvent,
-  type UniqueIdentifier,
 } from '@dnd-kit/core'
 import type { GanttHeader } from '../../entities/gantt-header/gantt-header.types'
 import { type Task } from '../../entities/task/task.types'
@@ -42,8 +39,8 @@ function BaseGanttChart(props: GanttChartProps) {
 }
 
 function TableGanttChart(props: GanttChartProps) {
+  const [isResizing, setIsResizing] = useState(false)
   const [headers, setHeaders] = useState(props.headers)
-  const [activeHeader, setActiveHeader] = useState<UniqueIdentifier>()
   const sensors = useSensors(
     useSensor(MouseSensor, {
       activationConstraint: {
@@ -51,11 +48,6 @@ function TableGanttChart(props: GanttChartProps) {
       },
     })
   )
-
-  const handleDragStart = (event: DragStartEvent) => {
-    const { active } = event
-    setActiveHeader(active.id)
-  }
 
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event
@@ -70,36 +62,34 @@ function TableGanttChart(props: GanttChartProps) {
         return arrayMove(headers, oldIndex, newIndex)
       })
     }
-
-    setActiveHeader(undefined)
   }
 
   return (
-    <div className="flex items-center justify-between">
+    <div className="flex items-center">
       <DndContext
         sensors={sensors}
         modifiers={[restrictToHorizontalAxis]}
-        onDragStart={handleDragStart}
         onDragEnd={handleDragEnd}
       >
         <SortableContext
           items={headers.map((header) => header.field)}
           strategy={horizontalListSortingStrategy}
+          disabled={isResizing}
         >
           {headers.map((header) =>
             header.isVisible ? (
-              <HeaderGantt key={header.field} header={header} />
+              <HeaderGantt
+                key={header.field}
+                header={header}
+                headers={headers}
+                isResizing={isResizing}
+                onResizingChange={setIsResizing}
+                onHeadersChange={setHeaders}
+              />
             ) : null
           )}
         </SortableContext>
         <NewHeaderGantt headers={headers} onHeadersChange={setHeaders} />
-        <DragOverlay>
-          {activeHeader ? (
-            <HeaderGantt
-              header={headers.find((header) => header.field === activeHeader)!}
-            />
-          ) : null}
-        </DragOverlay>
       </DndContext>
     </div>
   )

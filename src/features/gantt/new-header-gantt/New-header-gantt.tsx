@@ -6,6 +6,7 @@ import {
   DropdownMenu,
   DropdownToggle,
 } from '../../../shared/ui/dropdown/Dropdown.ui'
+import { ResizableContainer } from '../../../shared/ui/resizable-container/Resizable-container.ui'
 
 type NewHeaderGanttProps = {
   headers: GanttHeader[]
@@ -34,16 +35,21 @@ export function NewHeaderGantt({
 
   return (
     <Dropdown defaultOpen={isOpen}>
-      <DropdownToggle>
-        <input
-          type="text"
-          placeholder="Nouvelle colonne"
-          onClick={() => setIsOpen(true)}
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          className="border-grey-100 hover:bg-grey-100 border-y border-e p-4 outline-none"
-        />
-      </DropdownToggle>
+      <ResizableContainer
+        containerClassName="border-grey-100 hover:bg-grey-100 border-y border-e"
+        minWidth={100}
+      >
+        <DropdownToggle>
+          <input
+            type="text"
+            placeholder="Nouvelle colonne"
+            onClick={() => setIsOpen(true)}
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            className="w-full p-4 outline-none"
+          />
+        </DropdownToggle>
+      </ResizableContainer>
       <DropdownMenu>
         {headersFiltered.length ? (
           headersFiltered.map((header) => (

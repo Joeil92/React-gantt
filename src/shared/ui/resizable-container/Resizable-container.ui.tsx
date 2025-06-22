@@ -14,6 +14,9 @@ interface ResizableContainerProps
   minHeight?: number
   containerClassName?: string
   childrenClassName?: string
+  onResizeStart?: () => void
+  onResizeEnd?: () => void
+  onResize?: (width: number, height: number) => void
 }
 export function ResizableContainer({
   children,
@@ -22,12 +25,16 @@ export function ResizableContainer({
   minHeight = 10,
   containerClassName,
   childrenClassName,
+  onResizeStart,
+  onResizeEnd,
+  onResize,
   ...props
 }: PropsWithChildren<ResizableContainerProps>) {
   const containerRef = useRef<HTMLDivElement>(null)
 
   const handleMouseDown = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
     if (!containerRef.current) return
+    onResizeStart?.()
 
     document.body.style.userSelect = 'none'
 
@@ -39,19 +46,22 @@ export function ResizableContainer({
       element.getBoundingClientRect()
 
     const handleMouseMove = (e: MouseEvent) => {
+      let newWidth = startWidth
+      let newHeight = startHeight
+
       if (direction === 'vertical') {
-        const newWidth = Math.max(minWidth, startWidth + (e.clientX - startX))
+        newWidth = Math.max(minWidth, startWidth + (e.clientX - startX))
         element.style.width = `${newWidth}px`
       } else {
-        const newHeight = Math.max(
-          minHeight,
-          startHeight + (e.clientY - startY)
-        )
+        newHeight = Math.max(minHeight, startHeight + (e.clientY - startY))
         element.style.height = `${newHeight}px`
       }
+
+      onResize?.(newWidth, newHeight)
     }
 
     const handleMouseUp = () => {
+      onResizeEnd?.()
       document.body.style.userSelect = 'auto'
 
       document.removeEventListener('mouseup', handleMouseUp)
