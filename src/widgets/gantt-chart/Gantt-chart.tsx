@@ -14,9 +14,10 @@ import {
   horizontalListSortingStrategy,
   SortableContext,
 } from '@dnd-kit/sortable'
-import { useState } from 'react'
+import { useCallback, useState } from 'react'
 import { restrictToHorizontalAxis } from '@dnd-kit/modifiers'
 import { NewHeaderGantt } from '../../features/gantt/new-header-gantt/New-header-gantt'
+import { TaskCell } from '../../features/gantt/task-cell/Task-cell.ui'
 
 type GanttChartProps = {
   tasks: Task[]
@@ -40,6 +41,7 @@ function BaseGanttChart(props: GanttChartProps) {
 
 function TableGanttChart(props: GanttChartProps) {
   const [isResizing, setIsResizing] = useState(false)
+  const [tasks, setTasks] = useState(props.tasks)
   const [headers, setHeaders] = useState(props.headers)
   const sensors = useSensors(
     useSensor(MouseSensor, {
@@ -65,32 +67,86 @@ function TableGanttChart(props: GanttChartProps) {
   }
 
   return (
-    <div className="flex items-center">
-      <DndContext
-        sensors={sensors}
-        modifiers={[restrictToHorizontalAxis]}
-        onDragEnd={handleDragEnd}
-      >
-        <SortableContext
-          items={headers.map((header) => header.field)}
-          strategy={horizontalListSortingStrategy}
-          disabled={isResizing}
+    <div>
+      {/* Headers */}
+      <div className="flex items-center">
+        <DndContext
+          sensors={sensors}
+          modifiers={[restrictToHorizontalAxis]}
+          onDragEnd={handleDragEnd}
         >
-          {headers.map((header) =>
-            header.isVisible ? (
-              <HeaderGantt
-                key={header.field}
-                header={header}
-                headers={headers}
-                isResizing={isResizing}
-                onResizingChange={setIsResizing}
-                onHeadersChange={setHeaders}
-              />
-            ) : null
-          )}
-        </SortableContext>
-        <NewHeaderGantt headers={headers} onHeadersChange={setHeaders} />
-      </DndContext>
+          <SortableContext
+            items={headers.map((header) => header.field)}
+            strategy={horizontalListSortingStrategy}
+            disabled={isResizing}
+          >
+            {headers.map((header) =>
+              header.isVisible ? (
+                <HeaderGantt
+                  key={header.field}
+                  header={header}
+                  headers={headers}
+                  isResizing={isResizing}
+                  onResizingChange={setIsResizing}
+                  onHeadersChange={setHeaders}
+                />
+              ) : null
+            )}
+          </SortableContext>
+          <NewHeaderGantt headers={headers} onHeadersChange={setHeaders} />
+        </DndContext>
+      </div>
+      {/* Tasks */}
+      <div>
+        {tasks.map((task) => (
+          <TaskRow
+            key={task.id}
+            headers={headers.filter((h) => h.isVisible)}
+            task={task}
+            tasks={tasks}
+            onTasksChange={setTasks}
+          />
+        ))}
+      </div>
+    </div>
+  )
+}
+
+type TaskRowProps = {
+  headers: GanttHeader[]
+  task: Task
+  tasks: Task[]
+  onTasksChange: (tasks: Task[]) => void
+}
+function TaskRow({ task, headers, tasks, onTasksChange }: TaskRowProps) {
+  const handleTasksChange = useCallback(
+    (field: keyof Task, value: string | number) => {
+      const updatedTasks = tasks.map((t) => {
+        if (t.id === task.id) {
+          return { ...t, [field]: value }
+        }
+        return t
+      })
+      onTasksChange(updatedTasks)
+    },
+    [onTasksChange, tasks, task.id]
+  )
+
+  return (
+    <div className="border-grey-100 flex items-center border-b">
+      {headers.map((header) => {
+        const { width, field } = header
+
+        return (
+          <TaskCell
+            key={`${task.id}-${header.field}`}
+            displayValue={task[field as keyof Task]}
+            width={width}
+            fieldName={field}
+            onTasksChange={handleTasksChange}
+          />
+        )
+      })}
     </div>
   )
 }

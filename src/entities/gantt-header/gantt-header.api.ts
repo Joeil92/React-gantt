@@ -4,7 +4,6 @@ const ganttHeaders: GanttHeader[] = [
   {
     label: 'Titre',
     field: 'title',
-    type: 'string',
     width: 220,
     isVisible: true,
     isEditable: true,
@@ -12,7 +11,6 @@ const ganttHeaders: GanttHeader[] = [
   {
     label: 'Début',
     field: 'startDate',
-    type: 'date',
     width: 180,
     isVisible: true,
     isEditable: true,
@@ -20,7 +18,6 @@ const ganttHeaders: GanttHeader[] = [
   {
     label: 'Fin',
     field: 'endDate',
-    type: 'date',
     width: 180,
     isVisible: true,
     isEditable: true,
@@ -28,7 +25,6 @@ const ganttHeaders: GanttHeader[] = [
   {
     label: 'Durée',
     field: 'duration',
-    type: 'number',
     width: 180,
     isVisible: true,
     isEditable: true,
@@ -36,7 +32,6 @@ const ganttHeaders: GanttHeader[] = [
   {
     label: 'Progression',
     field: 'progress',
-    type: 'number',
     width: 180,
     isVisible: true,
     isEditable: true,
@@ -44,7 +39,6 @@ const ganttHeaders: GanttHeader[] = [
   {
     label: 'Prédécesseur',
     field: 'predecessor',
-    type: 'string',
     width: 180,
     isVisible: false,
     isEditable: true,
@@ -52,7 +46,6 @@ const ganttHeaders: GanttHeader[] = [
   {
     label: 'Successeur',
     field: 'successor',
-    type: 'string',
     width: 180,
     isVisible: false,
     isEditable: true,
