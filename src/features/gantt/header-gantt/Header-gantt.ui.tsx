@@ -1,4 +1,4 @@
-import { Filter } from 'lucide-react'
+import { CircleX, Filter } from 'lucide-react'
 import type { GanttHeader } from '../../../entities/gantt-header/gantt-header.types'
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
@@ -52,6 +52,13 @@ export function HeaderGantt({
     onHeadersChange(updatedHeaders)
   }
 
+  const onHiddingHeader = () => {
+    const updatedHeaders = headers.map((h) =>
+      h.field === header.field ? { ...header, isVisible: false } : h
+    )
+    onHeadersChange(updatedHeaders)
+  }
+
   return (
     <div
       className="border-grey-100 group hover:bg-grey-100 cursor-pointer border-y text-[16px] leading-[24px] first:border-s last:border-e"
@@ -74,7 +81,8 @@ export function HeaderGantt({
             </span>
           </ContextMenuToggle>
           <ContextMenuList>
-            <ContextMenuItem onClick={() => console.log('Edit')}>
+            <ContextMenuItem onClick={onHiddingHeader}>
+              <CircleX className="h-4 w-4" />
               Cacher la colonne
             </ContextMenuItem>
           </ContextMenuList>
