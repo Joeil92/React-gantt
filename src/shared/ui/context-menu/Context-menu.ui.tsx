@@ -109,7 +109,7 @@ function ContextMenuItem({
 }
 
 function ContextMenuDivider() {
-  return <hr className="border-grey-200" />
+  return <hr className="border-grey-200 my-1.5" />
 }
 
 export {
