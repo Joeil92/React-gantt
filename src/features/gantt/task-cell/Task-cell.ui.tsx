@@ -47,8 +47,6 @@ export function TaskCell({
   const isDuration = fieldName === 'duration'
   const isProgression = fieldName === 'progression'
 
-  if (isProgression) console.log(task)
-
   const handleKeyDown = (
     e: React.KeyboardEvent<HTMLInputElement | HTMLElement>
   ) => {
