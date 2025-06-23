@@ -18,6 +18,7 @@ import { useCallback, useState } from 'react'
 import { restrictToHorizontalAxis } from '@dnd-kit/modifiers'
 import { NewHeaderGantt } from '../../features/gantt/new-header-gantt/New-header-gantt'
 import { TaskCell } from '../../features/gantt/task-cell/Task-cell.ui'
+import { Toolbar } from '../../features/gantt/toolbar/Toolbar.ui'
 
 type GanttChartProps = {
   tasks: Task[]
@@ -29,20 +30,38 @@ export function GanttChart(props: GanttChartProps) {
 }
 
 function BaseGanttChart(props: GanttChartProps) {
+  const [tasks, setTasks] = useState(props.tasks)
+  const [headers, setHeaders] = useState(props.headers)
+
   return (
     <div>
       <Typography tag={'h5'} className="mb-8">
         Planning
       </Typography>
-      <TableGanttChart tasks={props.tasks} headers={props.headers} />
+      <Toolbar onTasksChange={setTasks} />
+      <TableGanttChart
+        tasks={tasks}
+        headers={headers}
+        onTasksChange={setTasks}
+        onHeadersChange={setHeaders}
+      />
     </div>
   )
 }
 
-function TableGanttChart(props: GanttChartProps) {
+type TableGanttChartProps = {
+  tasks: Task[]
+  headers: GanttHeader[]
+  onTasksChange: React.Dispatch<React.SetStateAction<Task[]>>
+  onHeadersChange: React.Dispatch<React.SetStateAction<GanttHeader[]>>
+}
+function TableGanttChart({
+  tasks,
+  headers,
+  onTasksChange,
+  onHeadersChange,
+}: TableGanttChartProps) {
   const [isResizing, setIsResizing] = useState(false)
-  const [tasks, setTasks] = useState(props.tasks)
-  const [headers, setHeaders] = useState(props.headers)
   const sensors = useSensors(
     useSensor(MouseSensor, {
       activationConstraint: {
@@ -55,7 +74,7 @@ function TableGanttChart(props: GanttChartProps) {
     const { active, over } = event
 
     if (over && active.id !== over.id) {
-      setHeaders((headers) => {
+      onHeadersChange((headers) => {
         const oldIndex = headers.findIndex(
           (header) => header.field === active.id
         )
@@ -88,12 +107,12 @@ function TableGanttChart(props: GanttChartProps) {
                   headers={headers}
                   isResizing={isResizing}
                   onResizingChange={setIsResizing}
-                  onHeadersChange={setHeaders}
+                  onHeadersChange={onHeadersChange}
                 />
               ) : null
             )}
           </SortableContext>
-          <NewHeaderGantt headers={headers} onHeadersChange={setHeaders} />
+          <NewHeaderGantt headers={headers} onHeadersChange={onHeadersChange} />
         </DndContext>
       </div>
       {/* Tasks */}
@@ -104,7 +123,7 @@ function TableGanttChart(props: GanttChartProps) {
             headers={headers.filter((h) => h.isVisible)}
             task={task}
             tasks={tasks}
-            onTasksChange={setTasks}
+            onTasksChange={onTasksChange}
           />
         ))}
       </div>
