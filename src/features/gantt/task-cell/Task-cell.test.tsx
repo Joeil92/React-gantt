@@ -3,8 +3,11 @@ import { describe, expect, it, vi } from 'vitest'
 import { renderWithProviders } from '../../../shared/lib/test/Test.lib'
 import { TaskCell } from './Task-cell.ui'
 import { screen, waitFor } from '@testing-library/dom'
+import { getTasks } from '../../../shared/api/api.service'
+import { formatDate } from 'date-fns'
 
 const mockOnTasksChange = vi.fn()
+const { data: tasks } = getTasks()
 
 describe('TaskCell', () => {
   it('should render a display value', () => {
@@ -41,17 +44,41 @@ describe('TaskCell', () => {
       () => {
         expect(input).not.toBeInTheDocument()
         expect(screen.getByText('test2')).toBeInTheDocument()
-        expect(mockOnTasksChange).toHaveBeenCalledWith('title', 'test2')
+        expect(mockOnTasksChange).toHaveBeenCalledWith('title', false)
+      },
+      { timeout: 3000 }
+    )
+  })
+
+  it('should update task when user change date', async () => {
+    const value = new Date('02/01/2025')
+    const dateFormat = formatDate(value, 'dd/MM/yyyy')
+    const { type, clear } = renderTaskCell('startDate', value)
+
+    await userEvent.dblClick(screen.getByText(dateFormat))
+
+    const input = screen.getByDisplayValue(dateFormat)
+
+    await clear(input)
+    await type(input, `${dateFormat}{Enter}`)
+
+    expect(mockOnTasksChange).not.toHaveBeenCalled() // It won't be called immediately
+
+    await waitFor(
+      () => {
+        expect(input).not.toBeInTheDocument()
+        expect(screen.getByText(dateFormat)).toBeInTheDocument()
       },
       { timeout: 3000 }
     )
   })
 })
 
-function renderTaskCell(fieldName: string, value: string) {
+function renderTaskCell(fieldName: string, value: unknown) {
   const user = userEvent.setup()
   const renderResult = renderWithProviders(
     <TaskCell
+      task={tasks[0]}
       displayValue={value}
       width={100}
       fieldName={fieldName}

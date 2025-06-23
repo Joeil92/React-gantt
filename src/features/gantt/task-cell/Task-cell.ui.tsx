@@ -1,14 +1,22 @@
 import type { Task } from '../../../entities/task/task.types'
 import { useEffect, useRef, useState } from 'react'
 import useDebouce from '../../../shared/hooks/use-debounce'
+import { formatDate, isWithinInterval, parse, subDays } from 'date-fns'
+import DatePicker, { registerLocale } from 'react-datepicker'
+import 'react-datepicker/dist/react-datepicker.css'
+import { fr } from 'date-fns/locale'
+
+registerLocale('fr', fr)
 
 type TaskCellProps = {
-  displayValue: string | number
+  task: Task
+  displayValue: unknown
   width: number
   fieldName: Omit<keyof Task, 'id' | 'color'>
-  onTasksChange: (field: keyof Task, value: string | number) => void
+  onTasksChange: (field: keyof Task, value: unknown) => void
 }
 export function TaskCell({
+  task,
   displayValue,
   width,
   fieldName,
@@ -17,16 +25,56 @@ export function TaskCell({
   const [value, setValue] = useState(displayValue)
   const [isEditable, setIsEditable] = useState(false)
 
-  const debouncedValue = useDebouce(value, 2000)
+  const onDebouncedCallback = (debouncedValue: boolean) => {
+    if (value === displayValue || debouncedValue) return
+    console.log(value, displayValue, debouncedValue)
+    onTasksChange(fieldName as keyof Task, debouncedValue)
+  }
+
+  useDebouce(isEditable, 2000, onDebouncedCallback)
 
   const stringFields = ['title']
+  const dateFields = ['startDate', 'endDate']
 
   const isString = stringFields.includes(fieldName as string)
+  const isDate = dateFields.includes(fieldName as string)
 
-  useEffect(() => {
-    if (debouncedValue === displayValue || isEditable) return
-    onTasksChange(fieldName as keyof Task, debouncedValue)
-  }, [debouncedValue, displayValue, onTasksChange, fieldName, isEditable])
+  const handleKeyDown = (
+    e: React.KeyboardEvent<HTMLInputElement | HTMLElement>
+  ) => {
+    if (e.key === 'Enter') {
+      setIsEditable(false)
+    }
+  }
+
+  const handleBlur = () => {
+    setIsEditable(false)
+  }
+
+  const getDateContraints = () => {
+    switch (fieldName) {
+      case 'startDate':
+        return {
+          includeDateIntervals: [
+            {
+              start: new Date(0),
+              end: task.endDate,
+            },
+          ],
+        }
+      case 'endDate':
+        return {
+          excludeDateIntervals: [
+            {
+              start: new Date(0),
+              end: subDays(task.startDate, 1),
+            },
+          ],
+        }
+      default:
+        return undefined
+    }
+  }
 
   return (
     <div
@@ -40,19 +88,34 @@ export function TaskCell({
           isEditable={isEditable}
           setIsEditable={setIsEditable}
           onValueChange={setValue}
+          onKeyDown={handleKeyDown}
+          onBlur={handleBlur}
+        />
+      )}
+      {isDate && (
+        <DateCell
+          displayValue={value as Date}
+          isEditable={isEditable}
+          setIsEditable={setIsEditable}
+          onValueChange={setValue}
+          onKeyDown={handleKeyDown}
+          onBlur={handleBlur}
+          {...getDateContraints()}
         />
       )}
     </div>
   )
 }
 
-type StringCellProps = {
-  displayValue: string
+type TypeCellProps<T, Y> = {
+  displayValue: T
   isEditable: boolean
   setIsEditable: (isEditable: boolean) => void
-  onValueChange: (value: string) => void
+  onValueChange: (value: T) => void
+  onKeyDown: (e: React.KeyboardEvent<Y>) => void
+  onBlur: () => void
 }
-function StringCell(props: StringCellProps) {
+function StringCell(props: TypeCellProps<string, HTMLInputElement>) {
   const inputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
@@ -60,13 +123,6 @@ function StringCell(props: StringCellProps) {
       inputRef.current?.select()
     }
   }, [props.isEditable])
-
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') {
-      props.setIsEditable(false)
-      props.onValueChange(props.displayValue)
-    }
-  }
 
   return props.isEditable ? (
     <input
@@ -76,12 +132,68 @@ function StringCell(props: StringCellProps) {
       value={props.displayValue}
       autoFocus
       onChange={(e) => props.onValueChange(e.target.value)}
-      onKeyDown={handleKeyDown}
-      onBlur={() => props.setIsEditable(false)}
+      onKeyDown={props.onKeyDown}
+      onBlur={props.onBlur}
     />
   ) : (
     <div className="p-4">
       <p className="truncate">{props.displayValue}</p>
     </div>
+  )
+}
+
+type DateCellProps = {
+  excludeDateIntervals?: { start: Date; end: Date }[]
+  includeDateIntervals?: { start: Date; end: Date }[]
+}
+function DateCell(props: TypeCellProps<Date, HTMLElement> & DateCellProps) {
+  const handleChangeRaw = (
+    e:
+      | React.MouseEvent<HTMLElement, MouseEvent>
+      | React.KeyboardEvent<HTMLElement>
+      | undefined
+  ) => {
+    if (!e) return
+
+    const input = (e.target as HTMLInputElement).value
+    if (!input) return
+
+    const parsedDate = parse(input, 'dd/MM/yyyy', new Date(), { locale: fr })
+    if (isNaN(parsedDate.getTime()) || parsedDate.getFullYear() < 1900) return
+
+    if (props.excludeDateIntervals) {
+      const isWithinIntervals = props.excludeDateIntervals.some((interval) =>
+        isWithinInterval(parsedDate, interval)
+      )
+      if (isWithinIntervals) return
+    }
+
+    if (props.includeDateIntervals) {
+      const isWithinIntervals = props.includeDateIntervals.some((interval) =>
+        isWithinInterval(parsedDate, interval)
+      )
+      if (!isWithinIntervals) return
+    }
+    props.onValueChange(parsedDate)
+  }
+
+  return props.isEditable ? (
+    <DatePicker
+      dateFormat={'dd/MM/yyyy'}
+      selected={props.displayValue}
+      autoFocus
+      onChange={(date) => date && props.onValueChange(date)}
+      onChangeRaw={handleChangeRaw}
+      className="w-full p-4"
+      locale={'fr'}
+      includeDateIntervals={props.includeDateIntervals}
+      excludeDateIntervals={props.excludeDateIntervals}
+      onKeyDown={props.onKeyDown}
+      onBlur={props.onBlur}
+    />
+  ) : (
+    <p className="truncate p-4">
+      {formatDate(props.displayValue, 'dd/MM/yyyy')}
+    </p>
   )
 }

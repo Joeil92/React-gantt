@@ -120,7 +120,7 @@ type TaskRowProps = {
 }
 function TaskRow({ task, headers, tasks, onTasksChange }: TaskRowProps) {
   const handleTasksChange = useCallback(
-    (field: keyof Task, value: string | number) => {
+    (field: keyof Task, value: unknown) => {
       const updatedTasks = tasks.map((t) => {
         if (t.id === task.id) {
           return { ...t, [field]: value }
@@ -140,6 +140,7 @@ function TaskRow({ task, headers, tasks, onTasksChange }: TaskRowProps) {
         return (
           <TaskCell
             key={`${task.id}-${header.field}`}
+            task={task}
             displayValue={task[field as keyof Task]}
             width={width}
             fieldName={field}
