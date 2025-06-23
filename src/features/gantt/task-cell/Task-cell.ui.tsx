@@ -33,7 +33,6 @@ export function TaskCell({
 
   const onDebouncedCallback = (debouncedValue: boolean) => {
     if (value === displayValue || debouncedValue) return
-    console.log(value, displayValue, debouncedValue)
     onTasksChange(fieldName as keyof Task, debouncedValue)
   }
 
