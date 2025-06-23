@@ -5,5 +5,4 @@ export const ganttHeaderSchema = z.object({
   label: z.string(),
   width: z.number(),
   isVisible: z.boolean(),
-  isEditable: z.boolean(),
 })

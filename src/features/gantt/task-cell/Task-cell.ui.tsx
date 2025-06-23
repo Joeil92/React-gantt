@@ -11,6 +11,7 @@ import {
 import DatePicker, { registerLocale } from 'react-datepicker'
 import 'react-datepicker/dist/react-datepicker.css'
 import { fr } from 'date-fns/locale'
+import { ProgressBar } from '../../../shared/ui/progress-bar/Progress-bar.ui'
 
 registerLocale('fr', fr)
 
@@ -44,6 +45,7 @@ export function TaskCell({
   const isString = stringFields.includes(fieldName as string)
   const isDate = dateFields.includes(fieldName as string)
   const isDuration = fieldName === 'duration'
+  const isProgression = fieldName === 'progression'
 
   const handleKeyDown = (
     e: React.KeyboardEvent<HTMLInputElement | HTMLElement>
@@ -114,6 +116,16 @@ export function TaskCell({
           displayValue={
             differenceInBusinessDays(task.endDate, task.startDate) + 2
           } // Add first day and last day
+        />
+      )}
+      {isProgression && (
+        <ProgressionCell
+          displayValue={value as number}
+          isEditable={isEditable}
+          setIsEditable={setIsEditable}
+          onValueChange={setValue}
+          onKeyDown={handleKeyDown}
+          onBlur={handleBlur}
         />
       )}
     </div>
@@ -215,4 +227,27 @@ function DurationCell(
   props: Pick<TypeCellProps<number, HTMLElement>, 'displayValue'>
 ) {
   return <p className="truncate p-4">{props.displayValue}j</p>
+}
+
+function ProgressionCell(props: TypeCellProps<number, HTMLElement>) {
+  return props.isEditable ? (
+    <input
+      type="number"
+      className="w-full p-4"
+      value={props.displayValue}
+      autoFocus
+      onChange={(e) => props.onValueChange(e.target.valueAsNumber)}
+      onKeyDown={props.onKeyDown}
+      onBlur={props.onBlur}
+    />
+  ) : (
+    <div className="w-full p-4">
+      <ProgressBar
+        progression={props.displayValue}
+        displayValue
+        rounded="full"
+        size="sm"
+      />
+    </div>
+  )
 }

@@ -83,6 +83,25 @@ describe('TaskCell', () => {
     expect(screen.getByText(`${duration}j`)).toBeInTheDocument()
     expect(mockOnTasksChange).not.toHaveBeenCalled()
   })
+
+  it('should update task when user change progress', async () => {
+    const value = 50
+    const { type, clear } = renderTaskCell('progression', value)
+
+    await userEvent.dblClick(screen.getByText(value + '%'))
+
+    const input = screen.getByDisplayValue(value)
+
+    await clear(input)
+    await type(input, `${value + 1}%{Enter}`)
+
+    expect(mockOnTasksChange).not.toHaveBeenCalled() // It won't be called immediately
+
+    await waitFor(() => {
+      expect(input).not.toBeInTheDocument()
+      expect(screen.getByText(value + 1 + '%')).toBeInTheDocument()
+    })
+  })
 })
 
 function renderTaskCell(fieldName: string, value: unknown) {
