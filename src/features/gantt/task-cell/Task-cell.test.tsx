@@ -44,7 +44,7 @@ describe('TaskCell', () => {
       () => {
         expect(input).not.toBeInTheDocument()
         expect(screen.getByText('test2')).toBeInTheDocument()
-        expect(mockOnTasksChange).toHaveBeenCalledWith('title', false)
+        expect(mockOnTasksChange).toHaveBeenCalledWith('title', 'test2')
       },
       { timeout: 3000 }
     )

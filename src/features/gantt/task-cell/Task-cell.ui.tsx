@@ -34,7 +34,7 @@ export function TaskCell({
 
   const onDebouncedCallback = (debouncedValue: boolean) => {
     if (value === displayValue || debouncedValue) return
-    onTasksChange(fieldName as keyof Task, debouncedValue)
+    onTasksChange(fieldName as keyof Task, value)
   }
 
   useDebouce(isEditable, 2000, onDebouncedCallback)
@@ -46,6 +46,8 @@ export function TaskCell({
   const isDate = dateFields.includes(fieldName as string)
   const isDuration = fieldName === 'duration'
   const isProgression = fieldName === 'progression'
+
+  if (isProgression) console.log(task)
 
   const handleKeyDown = (
     e: React.KeyboardEvent<HTMLInputElement | HTMLElement>
