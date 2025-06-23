@@ -133,7 +133,7 @@ function TaskRow({ task, headers, tasks, onTasksChange }: TaskRowProps) {
   )
 
   return (
-    <div className="border-grey-100 flex items-center border-b">
+    <div className="border-grey-100 flex items-stretch">
       {headers.map((header) => {
         const { width, field } = header
 
@@ -148,6 +148,7 @@ function TaskRow({ task, headers, tasks, onTasksChange }: TaskRowProps) {
           />
         )
       })}
+      <div className="border-grey-100 w-[250px] border-e border-b p-4"></div>
     </div>
   )
 }

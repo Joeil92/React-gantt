@@ -86,7 +86,7 @@ export function TaskCell({
 
   return (
     <div
-      className="border-grey-100 hover:bg-primary-100 cursor-default first:border-s"
+      className="border-grey-100 hover:bg-primary-100 cursor-default border-b first:border-s"
       style={{ width: width }}
       onDoubleClick={() => setIsEditable(true)}
     >
@@ -241,7 +241,7 @@ function ProgressionCell(props: TypeCellProps<number, HTMLElement>) {
       onBlur={props.onBlur}
     />
   ) : (
-    <div className="w-full p-4">
+    <div className="w-full px-4 py-5">
       <ProgressBar
         progression={props.displayValue}
         displayValue
