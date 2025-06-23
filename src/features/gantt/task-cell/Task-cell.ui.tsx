@@ -1,7 +1,13 @@
 import type { Task } from '../../../entities/task/task.types'
 import { useEffect, useRef, useState } from 'react'
 import useDebouce from '../../../shared/hooks/use-debounce'
-import { formatDate, isWithinInterval, parse, subDays } from 'date-fns'
+import {
+  differenceInBusinessDays,
+  formatDate,
+  isWithinInterval,
+  parse,
+  subDays,
+} from 'date-fns'
 import DatePicker, { registerLocale } from 'react-datepicker'
 import 'react-datepicker/dist/react-datepicker.css'
 import { fr } from 'date-fns/locale'
@@ -38,6 +44,7 @@ export function TaskCell({
 
   const isString = stringFields.includes(fieldName as string)
   const isDate = dateFields.includes(fieldName as string)
+  const isDuration = fieldName === 'duration'
 
   const handleKeyDown = (
     e: React.KeyboardEvent<HTMLInputElement | HTMLElement>
@@ -101,6 +108,13 @@ export function TaskCell({
           onKeyDown={handleKeyDown}
           onBlur={handleBlur}
           {...getDateContraints()}
+        />
+      )}
+      {isDuration && (
+        <DurationCell
+          displayValue={
+            differenceInBusinessDays(task.endDate, task.startDate) + 2
+          } // Add first day and last day
         />
       )}
     </div>
@@ -196,4 +210,10 @@ function DateCell(props: TypeCellProps<Date, HTMLElement> & DateCellProps) {
       {formatDate(props.displayValue, 'dd/MM/yyyy')}
     </p>
   )
+}
+
+function DurationCell(
+  props: Pick<TypeCellProps<number, HTMLElement>, 'displayValue'>
+) {
+  return <p className="truncate p-4">{props.displayValue}j</p>
 }

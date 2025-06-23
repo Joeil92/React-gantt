@@ -4,7 +4,7 @@ import { renderWithProviders } from '../../../shared/lib/test/Test.lib'
 import { TaskCell } from './Task-cell.ui'
 import { screen, waitFor } from '@testing-library/dom'
 import { getTasks } from '../../../shared/api/api.service'
-import { formatDate } from 'date-fns'
+import { differenceInBusinessDays, formatDate } from 'date-fns'
 
 const mockOnTasksChange = vi.fn()
 const { data: tasks } = getTasks()
@@ -71,6 +71,17 @@ describe('TaskCell', () => {
       },
       { timeout: 3000 }
     )
+  })
+
+  it('should render a duration between start and end date', () => {
+    const start = tasks[0].startDate
+    const end = tasks[0].endDate
+    const duration = differenceInBusinessDays(end, start) + 2
+
+    renderTaskCell('duration', undefined)
+
+    expect(screen.getByText(`${duration}j`)).toBeInTheDocument()
+    expect(mockOnTasksChange).not.toHaveBeenCalled()
   })
 })
 
