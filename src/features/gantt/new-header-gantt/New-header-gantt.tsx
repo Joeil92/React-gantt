@@ -33,8 +33,8 @@ export function NewHeaderGantt({
   }
 
   return (
-    <Dropdown defaultOpen={isOpen}>
-      <div className="border-grey-100 hover:bg-grey-100 w-[250px] border-y border-e">
+    <Dropdown defaultOpen={isOpen} className="flex-1">
+      <div className="border-grey-100 hover:bg-grey-100 border-y border-e">
         <DropdownToggle>
           <input
             type="text"

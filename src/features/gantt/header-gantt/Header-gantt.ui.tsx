@@ -43,6 +43,7 @@ export function HeaderGantt({
         opacity: 0.5,
       }),
     width: header.width,
+    minWidth: header.width,
   }
 
   const onResize = (width: number) => {

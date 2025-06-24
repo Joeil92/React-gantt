@@ -180,7 +180,7 @@ function TaskRow({ task, headers, tasks, onTasksChange }: TaskRowProps) {
           />
         )
       })}
-      <div className="border-grey-100 w-[250px] border-e border-b p-4"></div>
+      <div className="border-grey-100 flex-1 border-e border-b p-4"></div>
     </div>
   )
 }

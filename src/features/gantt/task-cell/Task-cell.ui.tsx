@@ -87,7 +87,7 @@ export function TaskCell({
   return (
     <div
       className="border-grey-100 hover:bg-primary-100 cursor-default border-b first:border-s"
-      style={{ width: width }}
+      style={{ width: width, minWidth: width }}
       onDoubleClick={() => setIsEditable(true)}
     >
       {isString && (

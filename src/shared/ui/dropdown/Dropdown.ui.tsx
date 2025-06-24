@@ -2,10 +2,15 @@ import clsx from 'clsx'
 import { useEffect, useRef, useState, type PropsWithChildren } from 'react'
 import { DropdownContext, useDropdown } from './dropdown.lib'
 
-type DropdownProps = {
+interface DropdownProps extends React.HTMLAttributes<HTMLDivElement> {
   defaultOpen?: boolean
 }
-function Dropdown({ defaultOpen, children }: PropsWithChildren<DropdownProps>) {
+function Dropdown({
+  defaultOpen,
+  children,
+  className,
+  ...props
+}: PropsWithChildren<DropdownProps>) {
   const [isOpen, setIsOpen] = useState(defaultOpen || false)
   const ref = useRef<HTMLDivElement>(null)
 
@@ -27,7 +32,7 @@ function Dropdown({ defaultOpen, children }: PropsWithChildren<DropdownProps>) {
 
   return (
     <DropdownContext value={{ isOpen, toggle }}>
-      <div className="relative" ref={ref}>
+      <div className={clsx('relative', className)} ref={ref} {...props}>
         {children}
       </div>
     </DropdownContext>
