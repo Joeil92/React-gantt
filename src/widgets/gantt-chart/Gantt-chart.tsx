@@ -19,6 +19,11 @@ import { restrictToHorizontalAxis } from '@dnd-kit/modifiers'
 import { NewHeaderGantt } from '../../features/gantt/new-header-gantt/New-header-gantt'
 import { TaskCell } from '../../features/gantt/task-cell/Task-cell.ui'
 import { Toolbar } from '../../features/gantt/toolbar/Toolbar.ui'
+import {
+  ResizablePanel,
+  ResizablePanelGroup,
+  ResizablePanelHandle,
+} from '../../shared/ui/resizable-panel/Resizable-panel.ui'
 
 type GanttChartProps = {
   tasks: Task[]
@@ -39,12 +44,20 @@ function BaseGanttChart(props: GanttChartProps) {
         Planning
       </Typography>
       <Toolbar onTasksChange={setTasks} />
-      <TableGanttChart
-        tasks={tasks}
-        headers={headers}
-        onTasksChange={setTasks}
-        onHeadersChange={setHeaders}
-      />
+      <ResizablePanelGroup>
+        <ResizablePanel>
+          <TableGanttChart
+            tasks={tasks}
+            headers={headers}
+            onTasksChange={setTasks}
+            onHeadersChange={setHeaders}
+          />
+        </ResizablePanel>
+        <ResizablePanelHandle />
+        <ResizablePanel>
+          <></>
+        </ResizablePanel>
+      </ResizablePanelGroup>
     </div>
   )
 }
