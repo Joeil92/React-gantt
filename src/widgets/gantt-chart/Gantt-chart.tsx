@@ -24,6 +24,7 @@ import {
   ResizablePanelGroup,
   ResizablePanelHandle,
 } from '../../shared/ui/resizable-panel/Resizable-panel.ui'
+import type { ViewGantt } from '../../features/gantt/toolbar/toolbar.types'
 
 type GanttChartProps = {
   tasks: Task[]
@@ -37,13 +38,18 @@ export function GanttChart(props: GanttChartProps) {
 function BaseGanttChart(props: GanttChartProps) {
   const [tasks, setTasks] = useState(props.tasks)
   const [headers, setHeaders] = useState(props.headers)
+  const [viewGantt, setViewGantt] = useState<ViewGantt>('day')
 
   return (
     <div>
       <Typography tag={'h5'} className="mb-8">
         Planning
       </Typography>
-      <Toolbar onTasksChange={setTasks} />
+      <Toolbar
+        onTasksChange={setTasks}
+        viewGantt={viewGantt}
+        onViewGanttChange={setViewGantt}
+      />
       <ResizablePanelGroup>
         <ResizablePanel>
           <TableGanttChart

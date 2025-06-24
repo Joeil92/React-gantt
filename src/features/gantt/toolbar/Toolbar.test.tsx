@@ -5,6 +5,7 @@ import { Toolbar } from './Toolbar.ui'
 import { screen } from '@testing-library/dom'
 
 const mockOnTasksChange = vi.fn()
+const mockOnViewGanttChange = vi.fn()
 
 describe('Toolbar', () => {
   it('should render a toolbar', () => {
@@ -17,12 +18,22 @@ describe('Toolbar', () => {
     await click(screen.getByText('Ajouter une tâche'))
     expect(mockOnTasksChange).toHaveBeenCalledOnce()
   })
+
+  it('should change view gantt when user click on button', async () => {
+    const { click } = renderToolbar()
+    await click(screen.getByText('Mois'))
+    expect(mockOnViewGanttChange).toHaveBeenCalledWith('month')
+  })
 })
 
 function renderToolbar() {
   const user = userEvent.setup({ delay: null })
   const renderResult = renderWithProviders(
-    <Toolbar onTasksChange={mockOnTasksChange} />
+    <Toolbar
+      onTasksChange={mockOnTasksChange}
+      viewGantt={'day'}
+      onViewGanttChange={mockOnViewGanttChange}
+    />
   )
   return { ...renderResult, ...user }
 }
