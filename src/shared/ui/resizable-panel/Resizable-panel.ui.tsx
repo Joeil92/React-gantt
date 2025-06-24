@@ -104,6 +104,8 @@ function ResizablePanelHandle() {
     const container = e.currentTarget.parentElement
     if (!container) return
 
+    document.body.style.userSelect = 'none'
+
     const moveListener = (ev: MouseEvent) => {
       const rect = container.getBoundingClientRect()
       const offset = isHorizontal
@@ -117,6 +119,8 @@ function ResizablePanelHandle() {
     const upListener = () => {
       document.removeEventListener('mousemove', moveListener)
       document.removeEventListener('mouseup', upListener)
+
+      document.body.style.userSelect = ''
     }
 
     document.addEventListener('mousemove', moveListener)
