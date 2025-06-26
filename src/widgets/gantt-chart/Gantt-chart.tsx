@@ -28,11 +28,14 @@ import type { ViewGantt } from '../../features/gantt/toolbar/toolbar.types'
 import {
   addMonths,
   addWeeks,
+  addYears,
   eachDayOfInterval,
   eachMonthOfInterval,
   eachWeekOfInterval,
+  eachYearOfInterval,
   endOfMonth,
   endOfWeek,
+  endOfYear,
   formatDate,
   isToday,
   isWeekend,
@@ -40,6 +43,7 @@ import {
   min,
   subMonths,
   subWeeks,
+  subYears,
 } from 'date-fns'
 import clsx from 'clsx'
 
@@ -57,7 +61,30 @@ function BaseGanttChart(props: GanttChartProps) {
   const [headers, setHeaders] = useState(props.headers)
   const [viewGantt, setViewGantt] = useState<ViewGantt>('day')
 
-  const headerSize = { height: 60, width: 250 }
+  const headerSize = useMemo(() => {
+    let height = 60
+    let width = 250
+    switch (viewGantt) {
+      case 'week':
+        height = 60
+        width = 250
+        break
+      case 'month':
+        height = 60
+        width = 1000
+        break
+      case 'year':
+        height = 60
+        width = 250
+        break
+      default:
+        height = 60
+        width = 250
+        break
+    }
+
+    return { height: height, width: width }
+  }, [viewGantt])
 
   return (
     <div>
@@ -259,6 +286,13 @@ export function ChartGantt({ headerSize, tasks, viewGantt }: ChartGanttProps) {
             maxDate={maxDate}
           />
         )}
+        {viewGantt === 'month' && (
+          <MonthView
+            width={headerSize.width}
+            minDate={minDate}
+            maxDate={maxDate}
+          />
+        )}
       </div>
     </div>
   )
@@ -342,6 +376,48 @@ function WeekView({ width, minDate, maxDate }: HeaderViewsProps) {
                   style={{ width: weekWidth }}
                 >
                   W{formatDate(weekDay, 'I')}
+                </span>
+              ))}
+            </div>
+          </div>
+        )
+      })}
+    </div>
+  )
+}
+
+function MonthView({ width, minDate, maxDate }: HeaderViewsProps) {
+  const years = useMemo(
+    () =>
+      eachYearOfInterval({
+        start: subYears(minDate, 1),
+        end: addYears(maxDate, 4),
+      }),
+    [minDate, maxDate]
+  )
+
+  return (
+    <div className="flex h-full items-center">
+      {years.map((year) => {
+        const months = eachMonthOfInterval({
+          start: year,
+          end: endOfYear(year),
+        })
+        const monthWidth = width / months.length
+
+        return (
+          <div key={year.getTime()} className="flex h-full flex-col">
+            <HeaderView date={year} format="yyyy" />
+            <div className="border-grey-200 flex items-center border-e border-b">
+              {months.map((month) => (
+                <span
+                  key={month.getTime()}
+                  className={clsx(
+                    'border-grey-200 flex-1 px-1.5 pt-1 text-center text-sm'
+                  )}
+                  style={{ width: monthWidth }}
+                >
+                  {formatDate(month, 'MMM')}
                 </span>
               ))}
             </div>
