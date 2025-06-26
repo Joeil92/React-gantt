@@ -26,15 +26,19 @@ import {
 } from '../../shared/ui/resizable-panel/Resizable-panel.ui'
 import type { ViewGantt } from '../../features/gantt/toolbar/toolbar.types'
 import {
+  addMonths,
   addWeeks,
   eachDayOfInterval,
+  eachMonthOfInterval,
   eachWeekOfInterval,
+  endOfMonth,
   endOfWeek,
   formatDate,
   isToday,
   isWeekend,
   max,
   min,
+  subMonths,
   subWeeks,
 } from 'date-fns'
 import clsx from 'clsx'
@@ -53,7 +57,7 @@ function BaseGanttChart(props: GanttChartProps) {
   const [headers, setHeaders] = useState(props.headers)
   const [viewGantt, setViewGantt] = useState<ViewGantt>('day')
 
-  const headerSize = { height: 60, width: 200 }
+  const headerSize = { height: 60, width: 250 }
 
   return (
     <div>
@@ -248,17 +252,24 @@ export function ChartGantt({ headerSize, tasks, viewGantt }: ChartGanttProps) {
             maxDate={maxDate}
           />
         )}
+        {viewGantt === 'week' && (
+          <WeekView
+            width={headerSize.width}
+            minDate={minDate}
+            maxDate={maxDate}
+          />
+        )}
       </div>
     </div>
   )
 }
 
-type DayViewProps = {
+type HeaderViewsProps = {
   width: number
   minDate: Date
   maxDate: Date
 }
-function DayView({ width, minDate, maxDate }: DayViewProps) {
+function DayView({ width, minDate, maxDate }: HeaderViewsProps) {
   const weeks = useMemo(
     () =>
       eachWeekOfInterval({
@@ -272,10 +283,11 @@ function DayView({ width, minDate, maxDate }: DayViewProps) {
     <div className="flex h-full items-center">
       {weeks.map((week) => {
         const days = eachDayOfInterval({ start: week, end: endOfWeek(week) })
+        const widthDay = width / days.length
 
         return (
           <div key={week.getTime()} className="flex h-full flex-col">
-            <HeaderView width={width} date={week} format="EEE dd MMM yyyy" />
+            <HeaderView date={week} format="EEE dd MMM yyyy" />
             <div className="border-grey-200 flex items-center border-e border-b">
               {days.map((day) => (
                 <span
@@ -285,6 +297,7 @@ function DayView({ width, minDate, maxDate }: DayViewProps) {
                     isWeekend(day) ? 'text-primary-300' : '',
                     isToday(day) ? 'bg-warning-100' : ''
                   )}
+                  style={{ width: widthDay }}
                 >
                   {formatDate(day, 'EEEEE')}
                 </span>
@@ -297,17 +310,55 @@ function DayView({ width, minDate, maxDate }: DayViewProps) {
   )
 }
 
+function WeekView({ width, minDate, maxDate }: HeaderViewsProps) {
+  const month = useMemo(
+    () =>
+      eachMonthOfInterval({
+        start: subMonths(minDate, 1),
+        end: addMonths(maxDate, 12),
+      }),
+    [minDate, maxDate]
+  )
+
+  return (
+    <div className="flex h-full items-center">
+      {month.map((month) => {
+        const week = eachWeekOfInterval({
+          start: month,
+          end: endOfMonth(month),
+        })
+        const weekWidth = width / week.length
+
+        return (
+          <div key={month.getTime()} className="flex h-full flex-col">
+            <HeaderView date={month} format="MMM yyyy" />
+            <div className="border-grey-200 flex items-center border-e border-b">
+              {week.map((weekDay) => (
+                <span
+                  key={weekDay.getTime()}
+                  className={clsx(
+                    'border-grey-200 flex-1 px-1.5 pt-1 text-center text-sm'
+                  )}
+                  style={{ width: weekWidth }}
+                >
+                  W{formatDate(weekDay, 'I')}
+                </span>
+              ))}
+            </div>
+          </div>
+        )
+      })}
+    </div>
+  )
+}
+
 type HeaderViewProps = {
-  width: number
   date: Date
   format: string
 }
-function HeaderView({ width, date, format }: HeaderViewProps) {
+function HeaderView({ date, format }: HeaderViewProps) {
   return (
-    <div
-      className="border-grey-200 flex flex-1 items-center justify-center border px-3 py-1.5 text-sm whitespace-nowrap not-first:border-l-0 first:border-l-0"
-      style={{ width }}
-    >
+    <div className="border-grey-200 flex flex-1 items-center justify-center border px-3 py-1.5 text-sm whitespace-nowrap not-first:border-l-0 first:border-l-0">
       <div className="text-center">{formatDate(date, format)}</div>
     </div>
   )
