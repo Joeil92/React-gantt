@@ -75,7 +75,7 @@ function BaseGanttChart(props: GanttChartProps) {
         break
       case 'year':
         height = 60
-        width = 250
+        width = 800
         break
       default:
         height = 60
@@ -293,6 +293,13 @@ export function ChartGantt({ headerSize, tasks, viewGantt }: ChartGanttProps) {
             maxDate={maxDate}
           />
         )}
+        {viewGantt === 'year' && (
+          <YearView
+            width={headerSize.width}
+            minDate={minDate}
+            maxDate={maxDate}
+          />
+        )}
       </div>
     </div>
   )
@@ -424,6 +431,31 @@ function MonthView({ width, minDate, maxDate }: HeaderViewsProps) {
           </div>
         )
       })}
+    </div>
+  )
+}
+
+function YearView({ width, minDate, maxDate }: HeaderViewsProps) {
+  const years = useMemo(
+    () =>
+      eachYearOfInterval({
+        start: subYears(minDate, 1),
+        end: addYears(maxDate, 4),
+      }),
+    [minDate, maxDate]
+  )
+
+  return (
+    <div className="flex h-full items-center">
+      {years.map((year) => (
+        <div
+          key={year.getTime()}
+          className="flex h-full flex-col"
+          style={{ minWidth: width }}
+        >
+          <HeaderView date={year} format="yyyy" />
+        </div>
+      ))}
     </div>
   )
 }
