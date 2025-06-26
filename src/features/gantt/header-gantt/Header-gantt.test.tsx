@@ -16,6 +16,15 @@ describe('HeaderGantt', () => {
 
 function renderHeaderGantt() {
   const user = userEvent.setup({ delay: null })
-  const renderResult = renderWithProviders(<HeaderGantt header={headers[0]} />)
+  const renderResult = renderWithProviders(
+    <HeaderGantt
+      header={headers[0]}
+      headers={headers}
+      headerSize={{ height: 60, width: 200 }}
+      isResizing={false}
+      onResizingChange={() => {}}
+      onHeadersChange={() => {}}
+    />
+  )
   return { ...renderResult, ...user }
 }

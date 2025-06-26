@@ -12,6 +12,10 @@ import {
 
 type HeaderGanttProps = {
   header: GanttHeader
+  headerSize: {
+    height: number
+    width: number
+  }
   isResizing?: boolean
   onResizingChange?: (isResizing: boolean) => void
   headers: GanttHeader[]
@@ -22,6 +26,7 @@ export function HeaderGantt({
   isResizing,
   onResizingChange,
   headers,
+  headerSize,
   onHeadersChange,
 }: HeaderGanttProps) {
   const {
@@ -44,6 +49,7 @@ export function HeaderGantt({
       }),
     width: header.width,
     minWidth: header.width,
+    height: headerSize.height,
   }
 
   const onResize = (width: number) => {
@@ -62,7 +68,7 @@ export function HeaderGantt({
 
   return (
     <div
-      className="border-grey-100 group hover:bg-grey-100 cursor-pointer border-y text-[16px] leading-[24px] first:border-s last:border-e"
+      className="group hover:bg-grey-100 text-grey-900 border-grey-200 cursor-pointer text-[16px] leading-[24px] first:border-s last:border-e"
       ref={setNodeRef}
       style={style}
       {...attributes}
@@ -75,7 +81,7 @@ export function HeaderGantt({
         onResizeEnd={() => onResizingChange?.(false)}
       >
         <ContextMenu>
-          <ContextMenuToggle className="flex items-center justify-between gap-4 p-4 font-semibold">
+          <ContextMenuToggle className="flex items-center justify-between gap-4 p-4">
             <span>{header.label}</span>
             <span className="text-grey-500 invisible group-hover:visible">
               <Filter className="h-4 w-4" />

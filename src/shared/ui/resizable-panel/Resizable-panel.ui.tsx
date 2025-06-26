@@ -138,14 +138,14 @@ function ResizablePanelHandle() {
   return (
     <div
       className={clsx(
-        'bg-grey-100 relative z-10',
+        'bg-grey-100 border-grey-200 relative z-10 border-y',
         isHorizontal ? 'w-2 cursor-col-resize' : 'h-2 cursor-row-resize'
       )}
       onMouseDown={onMouseDown}
     >
       <div
         className={clsx(
-          'bg-grey-100 absolute flex h-10 w-10 -translate-x-1/2 -translate-y-1/2 transform cursor-default items-center justify-center rounded-full p-1.5',
+          'bg-grey-100 border-grey-200 absolute flex h-10 w-10 -translate-x-1/2 -translate-y-1/2 transform cursor-default items-center justify-center rounded-full border p-1.5',
           isHorizontal ? 'top-1/2 left-1 flex-row' : 'top-1 left-1/2 flex-col'
         )}
       >
