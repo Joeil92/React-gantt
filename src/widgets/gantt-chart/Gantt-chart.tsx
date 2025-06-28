@@ -96,7 +96,7 @@ function BaseGanttChart(props: GanttChartProps) {
         viewGantt={viewGantt}
         onViewGanttChange={setViewGantt}
       />
-      <ResizablePanelGroup>
+      <ResizablePanelGroup className="min-h-screen">
         <ResizablePanel>
           <TableGanttChart
             tasks={tasks}
@@ -267,207 +267,130 @@ export function ChartGantt({ headerSize, tasks, viewGantt }: ChartGanttProps) {
   }, [tasks])
 
   return (
-    <div>
-      <div
-        className="bg-grey-100 text-grey-900"
-        style={{ height: headerSize.height }}
-      >
-        {viewGantt === 'day' && (
-          <DayView
-            width={headerSize.width}
-            minDate={minDate}
-            maxDate={maxDate}
-          />
-        )}
-        {viewGantt === 'week' && (
-          <WeekView
-            width={headerSize.width}
-            minDate={minDate}
-            maxDate={maxDate}
-          />
-        )}
-        {viewGantt === 'month' && (
-          <MonthView
-            width={headerSize.width}
-            minDate={minDate}
-            maxDate={maxDate}
-          />
-        )}
-        {viewGantt === 'year' && (
-          <YearView
-            width={headerSize.width}
-            minDate={minDate}
-            maxDate={maxDate}
-          />
-        )}
+    <div className="h-full overflow-x-scroll">
+      <div className="h-full">
+        <TimelineView
+          view={viewGantt}
+          maxDate={maxDate}
+          minDate={minDate}
+          headerSize={headerSize}
+        />
       </div>
     </div>
   )
 }
 
-type HeaderViewsProps = {
-  width: number
+type TimelineViewProps = {
+  view: ViewGantt
+  headerSize: {
+    height: number
+    width: number
+  }
   minDate: Date
   maxDate: Date
 }
-function DayView({ width, minDate, maxDate }: HeaderViewsProps) {
-  const weeks = useMemo(
-    () =>
-      eachWeekOfInterval({
-        start: subWeeks(minDate, 1),
-        end: addWeeks(maxDate, 12),
-      }),
-    [minDate, maxDate]
-  )
+function TimelineView({
+  view,
+  headerSize,
+  minDate,
+  maxDate,
+}: TimelineViewProps) {
+  const { headers, subHeadersFn, headerFormat, subHeaderFormat } =
+    useMemo(() => {
+      switch (view) {
+        case 'week':
+          return {
+            headers: eachMonthOfInterval({
+              start: subMonths(minDate, 1),
+              end: addMonths(maxDate, 12),
+            }),
+            subHeadersFn: (month: Date) =>
+              eachWeekOfInterval({
+                start: month,
+                end: endOfMonth(month),
+              }),
+            headerFormat: 'MMM yyyy',
+            subHeaderFormat: 'I',
+          }
+        case 'month':
+          return {
+            headers: eachYearOfInterval({
+              start: subYears(minDate, 1),
+              end: addYears(maxDate, 4),
+            }),
+            subHeadersFn: (year: Date) =>
+              eachMonthOfInterval({
+                start: year,
+                end: endOfYear(year),
+              }),
+            headerFormat: 'yyyy',
+            subHeaderFormat: 'MMM',
+          }
+        case 'year':
+          return {
+            headers: eachYearOfInterval({
+              start: subYears(minDate, 1),
+              end: addYears(maxDate, 4),
+            }),
+            headerFormat: 'yyyy',
+          }
+        default:
+          return {
+            headers: eachWeekOfInterval({
+              start: subWeeks(minDate, 1),
+              end: addWeeks(maxDate, 12),
+            }),
+            subHeadersFn: (week: Date) =>
+              eachDayOfInterval({ start: week, end: endOfWeek(week) }),
+            headerFormat: 'EEE dd MMM yyyy',
+            subHeaderFormat: 'EEEEE',
+          }
+      }
+    }, [view, minDate, maxDate])
 
   return (
     <div className="flex h-full items-center">
-      {weeks.map((week) => {
-        const days = eachDayOfInterval({ start: week, end: endOfWeek(week) })
-        const widthDay = width / days.length
+      {headers.map((header, index) => {
+        const subHeaders = subHeadersFn?.(header) || []
+        const width = headerSize.width / subHeaders.length
 
         return (
-          <div key={week.getTime()} className="flex h-full flex-col">
-            <HeaderView date={week} format="EEE dd MMM yyyy" />
-            <div className="border-grey-200 flex items-center border-e border-b">
-              {days.map((day) => (
-                <span
-                  key={day.getTime()}
-                  className={clsx(
-                    'border-grey-200 flex-1 px-1.5 pt-1 text-center text-sm',
-                    isWeekend(day) ? 'text-primary-300' : '',
-                    isToday(day) ? 'bg-warning-100' : ''
-                  )}
-                  style={{ width: widthDay }}
-                >
-                  {formatDate(day, 'EEEEE')}
-                </span>
-              ))}
+          <div className="flex h-full flex-col" key={header.getTime()}>
+            <div
+              className="border-grey-200 border px-3 py-1.5 text-center text-sm whitespace-nowrap not-first:border-l-0 first:border-l-0"
+              style={{
+                minWidth: view === 'year' ? headerSize.width : undefined,
+              }}
+            >
+              <span>{formatDate(header, headerFormat)}</span>
             </div>
+            {subHeaders.length ? (
+              <div className="border-grey-200 flex items-center border-e border-b">
+                {subHeaders.map((subHeader) => (
+                  <span
+                    key={subHeader.getTime()}
+                    className={clsx(
+                      'border-grey-200 flex-1 px-1.5 pt-1 text-center text-sm',
+                      isWeekend(subHeader) ? 'text-primary-300' : '',
+                      isToday(subHeader) ? 'bg-warning-100' : ''
+                    )}
+                    style={{ minWidth: width }}
+                  >
+                    {view === 'week' ? 'W' : ''}
+                    {formatDate(subHeader, subHeaderFormat || '')}
+                  </span>
+                ))}
+              </div>
+            ) : null}
+            <div
+              className={clsx(
+                'border-grey-200 flex-1 border-r',
+                index % 2 === 0 ? 'bg-grey-100' : 'bg-white'
+              )}
+            />
           </div>
         )
       })}
-    </div>
-  )
-}
-
-function WeekView({ width, minDate, maxDate }: HeaderViewsProps) {
-  const month = useMemo(
-    () =>
-      eachMonthOfInterval({
-        start: subMonths(minDate, 1),
-        end: addMonths(maxDate, 12),
-      }),
-    [minDate, maxDate]
-  )
-
-  return (
-    <div className="flex h-full items-center">
-      {month.map((month) => {
-        const week = eachWeekOfInterval({
-          start: month,
-          end: endOfMonth(month),
-        })
-        const weekWidth = width / week.length
-
-        return (
-          <div key={month.getTime()} className="flex h-full flex-col">
-            <HeaderView date={month} format="MMM yyyy" />
-            <div className="border-grey-200 flex items-center border-e border-b">
-              {week.map((weekDay) => (
-                <span
-                  key={weekDay.getTime()}
-                  className={clsx(
-                    'border-grey-200 flex-1 px-1.5 pt-1 text-center text-sm'
-                  )}
-                  style={{ width: weekWidth }}
-                >
-                  W{formatDate(weekDay, 'I')}
-                </span>
-              ))}
-            </div>
-          </div>
-        )
-      })}
-    </div>
-  )
-}
-
-function MonthView({ width, minDate, maxDate }: HeaderViewsProps) {
-  const years = useMemo(
-    () =>
-      eachYearOfInterval({
-        start: subYears(minDate, 1),
-        end: addYears(maxDate, 4),
-      }),
-    [minDate, maxDate]
-  )
-
-  return (
-    <div className="flex h-full items-center">
-      {years.map((year) => {
-        const months = eachMonthOfInterval({
-          start: year,
-          end: endOfYear(year),
-        })
-        const monthWidth = width / months.length
-
-        return (
-          <div key={year.getTime()} className="flex h-full flex-col">
-            <HeaderView date={year} format="yyyy" />
-            <div className="border-grey-200 flex items-center border-e border-b">
-              {months.map((month) => (
-                <span
-                  key={month.getTime()}
-                  className={clsx(
-                    'border-grey-200 flex-1 px-1.5 pt-1 text-center text-sm'
-                  )}
-                  style={{ width: monthWidth }}
-                >
-                  {formatDate(month, 'MMM')}
-                </span>
-              ))}
-            </div>
-          </div>
-        )
-      })}
-    </div>
-  )
-}
-
-function YearView({ width, minDate, maxDate }: HeaderViewsProps) {
-  const years = useMemo(
-    () =>
-      eachYearOfInterval({
-        start: subYears(minDate, 1),
-        end: addYears(maxDate, 4),
-      }),
-    [minDate, maxDate]
-  )
-
-  return (
-    <div className="flex h-full items-center">
-      {years.map((year) => (
-        <div
-          key={year.getTime()}
-          className="flex h-full flex-col"
-          style={{ minWidth: width }}
-        >
-          <HeaderView date={year} format="yyyy" />
-        </div>
-      ))}
-    </div>
-  )
-}
-
-type HeaderViewProps = {
-  date: Date
-  format: string
-}
-function HeaderView({ date, format }: HeaderViewProps) {
-  return (
-    <div className="border-grey-200 flex flex-1 items-center justify-center border px-3 py-1.5 text-sm whitespace-nowrap not-first:border-l-0 first:border-l-0">
-      <div className="text-center">{formatDate(date, format)}</div>
     </div>
   )
 }
