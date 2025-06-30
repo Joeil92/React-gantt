@@ -111,6 +111,7 @@ function renderTaskCell(fieldName: string, value: unknown) {
       task={tasks[0]}
       displayValue={value}
       width={100}
+      height={80}
       fieldName={fieldName}
       onTasksChange={mockOnTasksChange}
     />

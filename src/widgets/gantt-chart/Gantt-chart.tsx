@@ -41,11 +41,15 @@ import {
   isWeekend,
   max,
   min,
+  startOfMonth,
+  startOfWeek,
+  startOfYear,
   subMonths,
   subWeeks,
   subYears,
 } from 'date-fns'
 import clsx from 'clsx'
+import { TaskBar } from '../../features/gantt/task-bar/Task-bar.ui'
 
 type GanttChartProps = {
   tasks: Task[]
@@ -60,26 +64,27 @@ function BaseGanttChart(props: GanttChartProps) {
   const [tasks, setTasks] = useState(props.tasks)
   const [headers, setHeaders] = useState(props.headers)
   const [viewGantt, setViewGantt] = useState<ViewGantt>('day')
+  const taskHeight = 64
 
   const headerSize = useMemo(() => {
     let height = 60
-    let width = 250
+    let width = 50
     switch (viewGantt) {
       case 'week':
         height = 60
-        width = 250
+        width = 50
         break
       case 'month':
         height = 60
-        width = 1000
+        width = 100
         break
       case 'year':
         height = 60
-        width = 800
+        width = 500
         break
       default:
         height = 60
-        width = 250
+        width = 50
         break
     }
 
@@ -104,6 +109,7 @@ function BaseGanttChart(props: GanttChartProps) {
             headerSize={headerSize}
             onTasksChange={setTasks}
             onHeadersChange={setHeaders}
+            taskHeight={taskHeight}
           />
         </ResizablePanel>
         <ResizablePanelHandle />
@@ -111,6 +117,7 @@ function BaseGanttChart(props: GanttChartProps) {
           <ChartGantt
             headerSize={headerSize}
             tasks={tasks}
+            taskHeight={taskHeight}
             viewGantt={viewGantt}
           />
         </ResizablePanel>
@@ -126,6 +133,7 @@ type TableGanttChartProps = {
     height: number
     width: number
   }
+  taskHeight: number
   onTasksChange: React.Dispatch<React.SetStateAction<Task[]>>
   onHeadersChange: React.Dispatch<React.SetStateAction<GanttHeader[]>>
 }
@@ -133,6 +141,7 @@ function TableGanttChart({
   tasks,
   headers,
   headerSize,
+  taskHeight,
   onTasksChange,
   onHeadersChange,
 }: TableGanttChartProps) {
@@ -199,6 +208,7 @@ function TableGanttChart({
             headers={headers.filter((h) => h.isVisible)}
             task={task}
             tasks={tasks}
+            taskHeight={taskHeight}
             onTasksChange={onTasksChange}
           />
         ))}
@@ -211,9 +221,16 @@ type TaskRowProps = {
   headers: GanttHeader[]
   task: Task
   tasks: Task[]
+  taskHeight: number
   onTasksChange: (tasks: Task[]) => void
 }
-function TaskRow({ task, headers, tasks, onTasksChange }: TaskRowProps) {
+function TaskRow({
+  task,
+  headers,
+  tasks,
+  taskHeight,
+  onTasksChange,
+}: TaskRowProps) {
   const handleTasksChange = useCallback(
     (field: keyof Task, value: unknown) => {
       const updatedTasks = tasks.map((t) => {
@@ -238,12 +255,16 @@ function TaskRow({ task, headers, tasks, onTasksChange }: TaskRowProps) {
             task={task}
             displayValue={task[field as keyof Task]}
             width={width}
+            height={taskHeight}
             fieldName={field}
             onTasksChange={handleTasksChange}
           />
         )
       })}
-      <div className="border-grey-100 flex-1 border-e border-b p-4"></div>
+      <div
+        className="border-grey-100 flex-1 border-e border-b p-4"
+        style={{ minHeight: taskHeight }}
+      />
     </div>
   )
 }
@@ -254,9 +275,15 @@ type ChartGanttProps = {
     width: number
   }
   tasks: Task[]
+  taskHeight: number
   viewGantt: ViewGantt
 }
-export function ChartGantt({ headerSize, tasks, viewGantt }: ChartGanttProps) {
+export function ChartGantt({
+  headerSize,
+  tasks,
+  taskHeight,
+  viewGantt,
+}: ChartGanttProps) {
   const { minDate, maxDate } = useMemo(() => {
     if (!tasks.length) return { minDate: new Date(), maxDate: new Date() }
     const dates = tasks.map((task) => [task.startDate, task.endDate]).flat()
@@ -266,43 +293,21 @@ export function ChartGantt({ headerSize, tasks, viewGantt }: ChartGanttProps) {
     }
   }, [tasks])
 
-  return (
-    <div className="h-full overflow-x-scroll">
-      <div className="h-full">
-        <TimelineView
-          view={viewGantt}
-          maxDate={maxDate}
-          minDate={minDate}
-          headerSize={headerSize}
-        />
-      </div>
-    </div>
-  )
-}
-
-type TimelineViewProps = {
-  view: ViewGantt
-  headerSize: {
-    height: number
-    width: number
-  }
-  minDate: Date
-  maxDate: Date
-}
-function TimelineView({
-  view,
-  headerSize,
-  minDate,
-  maxDate,
-}: TimelineViewProps) {
-  const { headers, subHeadersFn, headerFormat, subHeaderFormat } =
+  const { realStart, headers, subHeadersFn, headerFormat, subHeaderFormat } =
     useMemo(() => {
-      switch (view) {
+      let realStart = minDate
+      let realEnd = maxDate
+
+      switch (viewGantt) {
         case 'week':
+          realStart = subMonths(minDate, 1)
+          realEnd = addMonths(maxDate, 12)
+
           return {
+            realStart: startOfMonth(realStart),
             headers: eachMonthOfInterval({
-              start: subMonths(minDate, 1),
-              end: addMonths(maxDate, 12),
+              start: realStart,
+              end: realEnd,
             }),
             subHeadersFn: (month: Date) =>
               eachWeekOfInterval({
@@ -313,10 +318,14 @@ function TimelineView({
             subHeaderFormat: 'I',
           }
         case 'month':
+          realStart = subYears(minDate, 1)
+          realEnd = addYears(maxDate, 4)
+
           return {
+            realStart: startOfYear(realStart),
             headers: eachYearOfInterval({
-              start: subYears(minDate, 1),
-              end: addYears(maxDate, 4),
+              start: realStart,
+              end: realEnd,
             }),
             subHeadersFn: (year: Date) =>
               eachMonthOfInterval({
@@ -327,18 +336,26 @@ function TimelineView({
             subHeaderFormat: 'MMM',
           }
         case 'year':
+          realStart = subYears(minDate, 1)
+          realEnd = addYears(maxDate, 4)
+
           return {
+            realStart: startOfYear(realStart),
             headers: eachYearOfInterval({
-              start: subYears(minDate, 1),
-              end: addYears(maxDate, 4),
+              start: realStart,
+              end: realEnd,
             }),
             headerFormat: 'yyyy',
           }
         default:
+          realStart = subWeeks(minDate, 1)
+          realEnd = addWeeks(maxDate, 12)
+
           return {
+            realStart: startOfWeek(realStart),
             headers: eachWeekOfInterval({
-              start: subWeeks(minDate, 1),
-              end: addWeeks(maxDate, 12),
+              start: realStart,
+              end: realEnd,
             }),
             subHeadersFn: (week: Date) =>
               eachDayOfInterval({ start: week, end: endOfWeek(week) }),
@@ -346,35 +363,84 @@ function TimelineView({
             subHeaderFormat: 'EEEEE',
           }
       }
-    }, [view, minDate, maxDate])
+    }, [viewGantt, minDate, maxDate])
 
+  return (
+    <div className="relative h-full overflow-x-scroll overflow-y-hidden">
+      <div className="h-full">
+        <TimelineView
+          view={viewGantt}
+          headers={headers}
+          subHeadersFn={subHeadersFn}
+          headerFormat={headerFormat}
+          subHeaderFormat={subHeaderFormat}
+          headerSize={headerSize}
+        />
+        <div
+          className="absolute top-0 left-0 h-full min-w-full"
+          style={{ marginTop: headerSize.height }}
+        >
+          {tasks.map((task) => (
+            <TaskBar
+              task={task}
+              key={task.id}
+              height={taskHeight}
+              startDate={realStart}
+              widthPerHeader={headerSize.width}
+              view={viewGantt}
+            />
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+type TimelineViewProps = {
+  headers: Date[]
+  subHeadersFn?: (header: Date) => Date[]
+  headerFormat: string
+  subHeaderFormat?: string
+  view: ViewGantt
+  headerSize: {
+    height: number
+    width: number
+  }
+}
+function TimelineView({
+  headers,
+  subHeadersFn,
+  headerFormat,
+  subHeaderFormat,
+  view,
+  headerSize,
+}: TimelineViewProps) {
   return (
     <div className="flex h-full items-center">
       {headers.map((header, index) => {
         const subHeaders = subHeadersFn?.(header) || []
-        const width = headerSize.width / subHeaders.length
 
         return (
           <div className="flex h-full flex-col" key={header.getTime()}>
             <div
               className="border-grey-200 border px-3 py-1.5 text-center text-sm whitespace-nowrap not-first:border-l-0 first:border-l-0"
               style={{
-                minWidth: view === 'year' ? headerSize.width : undefined,
+                width: view === 'year' ? headerSize.width : undefined,
               }}
             >
               <span>{formatDate(header, headerFormat)}</span>
             </div>
             {subHeaders.length ? (
-              <div className="border-grey-200 flex items-center border-e border-b">
+              <div className="border-grey-200 flex items-center border-b">
                 {subHeaders.map((subHeader) => (
                   <span
                     key={subHeader.getTime()}
                     className={clsx(
-                      'border-grey-200 flex-1 px-1.5 pt-1 text-center text-sm',
+                      'border-grey-200 flex-1 px-1.5 text-center text-sm last:border-e',
                       isWeekend(subHeader) ? 'text-primary-300' : '',
                       isToday(subHeader) ? 'bg-warning-100' : ''
                     )}
-                    style={{ minWidth: width }}
+                    style={{ width: headerSize.width }}
                   >
                     {view === 'week' ? 'W' : ''}
                     {formatDate(subHeader, subHeaderFormat || '')}

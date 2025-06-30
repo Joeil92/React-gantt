@@ -8,17 +8,16 @@ import {
   parse,
   subDays,
 } from 'date-fns'
-import DatePicker, { registerLocale } from 'react-datepicker'
+import DatePicker from 'react-datepicker'
 import 'react-datepicker/dist/react-datepicker.css'
 import { fr } from 'date-fns/locale'
 import { ProgressBar } from '../../../shared/ui/progress-bar/Progress-bar.ui'
-
-registerLocale('fr', fr)
 
 type TaskCellProps = {
   task: Task
   displayValue: unknown
   width: number
+  height: number
   fieldName: Omit<keyof Task, 'id' | 'color'>
   onTasksChange: (field: keyof Task, value: unknown) => void
 }
@@ -26,6 +25,7 @@ export function TaskCell({
   task,
   displayValue,
   width,
+  height,
   fieldName,
   onTasksChange,
 }: TaskCellProps) {
@@ -86,8 +86,8 @@ export function TaskCell({
 
   return (
     <div
-      className="border-grey-100 hover:bg-primary-100 cursor-default border-b first:border-s"
-      style={{ width: width, minWidth: width }}
+      className="border-grey-100 hover:bg-primary-100 flex cursor-default items-center border-b first:border-s"
+      style={{ width: width, minHeight: height }}
       onDoubleClick={() => setIsEditable(true)}
     >
       {isString && (
