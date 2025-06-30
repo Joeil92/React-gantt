@@ -40,15 +40,15 @@ export function HeaderGantt({
     id: header.field,
   })
 
-  const style = {
+  const style: React.CSSProperties = {
     transform: CSS.Transform.toString(transform),
     transition,
     ...(isDragging &&
       !isResizing && {
         opacity: 0.5,
       }),
-    width: header.width,
     minWidth: header.width,
+    maxWidth: header.width,
     height: headerSize.height,
   }
 
@@ -68,7 +68,7 @@ export function HeaderGantt({
 
   return (
     <div
-      className="group hover:bg-grey-100 text-grey-900 border-grey-200 cursor-pointer text-[16px] leading-[24px] first:border-s last:border-e"
+      className="group hover:bg-grey-100 text-grey-900 border-grey-200 cursor-pointer border-b text-[16px] leading-[24px] first:border-s last:border-e"
       ref={setNodeRef}
       style={style}
       {...attributes}

@@ -10,7 +10,6 @@ import {
 } from 'date-fns'
 import DatePicker from 'react-datepicker'
 import 'react-datepicker/dist/react-datepicker.css'
-import { fr } from 'date-fns/locale'
 import { ProgressBar } from '../../../shared/ui/progress-bar/Progress-bar.ui'
 
 type TaskCellProps = {
@@ -87,7 +86,7 @@ export function TaskCell({
   return (
     <div
       className="border-grey-100 hover:bg-primary-100 flex cursor-default items-center border-b first:border-s"
-      style={{ width: width, minHeight: height }}
+      style={{ minWidth: width, maxWidth: width, minHeight: height }}
       onDoubleClick={() => setIsEditable(true)}
     >
       {isString && (
@@ -161,7 +160,7 @@ function StringCell(props: TypeCellProps<string, HTMLInputElement>) {
       onBlur={props.onBlur}
     />
   ) : (
-    <div className="p-4">
+    <div className="w-full p-4">
       <p className="truncate">{props.displayValue}</p>
     </div>
   )
@@ -183,7 +182,7 @@ function DateCell(props: TypeCellProps<Date, HTMLElement> & DateCellProps) {
     const input = (e.target as HTMLInputElement).value
     if (!input) return
 
-    const parsedDate = parse(input, 'dd/MM/yyyy', new Date(), { locale: fr })
+    const parsedDate = parse(input, 'dd/MM/yyyy', new Date())
     if (isNaN(parsedDate.getTime()) || parsedDate.getFullYear() < 1900) return
 
     if (props.excludeDateIntervals) {
@@ -234,7 +233,8 @@ function ProgressionCell(props: TypeCellProps<number, HTMLElement>) {
     <input
       type="number"
       className="w-full p-4"
-      value={props.displayValue}
+      min={0}
+      value={props.displayValue || 0}
       autoFocus
       onChange={(e) => props.onValueChange(e.target.valueAsNumber)}
       onKeyDown={props.onKeyDown}

@@ -10,10 +10,12 @@ import {
 type NewHeaderGanttProps = {
   headers: GanttHeader[]
   onHeadersChange: (headers: GanttHeader[]) => void
+  headerHeight: number
 }
 export function NewHeaderGantt({
   headers,
   onHeadersChange,
+  headerHeight,
 }: NewHeaderGanttProps) {
   const [isOpen, setIsOpen] = useState(false)
   const [input, setInput] = useState('')
@@ -34,7 +36,10 @@ export function NewHeaderGantt({
 
   return (
     <Dropdown defaultOpen={isOpen} className="flex-1">
-      <div className="border-grey-100 hover:bg-grey-100 border-y border-e">
+      <div
+        className="hover:bg-grey-100 border-grey-200 border-b"
+        style={{ height: headerHeight }}
+      >
         <DropdownToggle>
           <input
             type="text"

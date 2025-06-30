@@ -93,7 +93,7 @@ describe('TaskCell', () => {
     const input = screen.getByDisplayValue(value)
 
     await clear(input)
-    await type(input, `${value + 1}%{Enter}`)
+    await type(input, `${value + 1}{Enter}`)
 
     expect(mockOnTasksChange).not.toHaveBeenCalled() // It won't be called immediately
 

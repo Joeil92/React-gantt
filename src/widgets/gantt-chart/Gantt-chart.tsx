@@ -172,7 +172,7 @@ function TableGanttChart({
   return (
     <div>
       {/* Headers */}
-      <div className="border-grey-200 flex items-center border-y">
+      <div className="border-grey-200 flex items-center border-t">
         <DndContext
           sensors={sensors}
           modifiers={[restrictToHorizontalAxis]}
@@ -197,7 +197,11 @@ function TableGanttChart({
               ) : null
             )}
           </SortableContext>
-          <NewHeaderGantt headers={headers} onHeadersChange={onHeadersChange} />
+          <NewHeaderGantt
+            headers={headers}
+            onHeadersChange={onHeadersChange}
+            headerHeight={headerSize.height}
+          />
         </DndContext>
       </div>
       {/* Tasks */}
@@ -423,31 +427,36 @@ function TimelineView({
         return (
           <div className="flex h-full flex-col" key={header.getTime()}>
             <div
-              className="border-grey-200 border px-3 py-1.5 text-center text-sm whitespace-nowrap not-first:border-l-0 first:border-l-0"
-              style={{
-                width: view === 'year' ? headerSize.width : undefined,
-              }}
+              className="border-grey-200 flex flex-col border-b"
+              style={{ height: headerSize.height }}
             >
-              <span>{formatDate(header, headerFormat)}</span>
-            </div>
-            {subHeaders.length ? (
-              <div className="border-grey-200 flex items-center border-b">
-                {subHeaders.map((subHeader) => (
-                  <span
-                    key={subHeader.getTime()}
-                    className={clsx(
-                      'border-grey-200 flex-1 px-1.5 text-center text-sm last:border-e',
-                      isWeekend(subHeader) ? 'text-primary-300' : '',
-                      isToday(subHeader) ? 'bg-warning-100' : ''
-                    )}
-                    style={{ width: headerSize.width }}
-                  >
-                    {view === 'week' ? 'W' : ''}
-                    {formatDate(subHeader, subHeaderFormat || '')}
-                  </span>
-                ))}
+              <div
+                className="border-grey-200 border px-3 py-1.5 text-center text-sm whitespace-nowrap not-first:border-l-0 first:border-l-0"
+                style={{
+                  width: view === 'year' ? headerSize.width : undefined,
+                }}
+              >
+                <span>{formatDate(header, headerFormat)}</span>
               </div>
-            ) : null}
+              {subHeaders.length ? (
+                <div className="flex h-full items-center">
+                  {subHeaders.map((subHeader) => (
+                    <span
+                      key={subHeader.getTime()}
+                      className={clsx(
+                        'border-grey-200 flex h-full items-center justify-center px-1.5 text-center text-sm last:border-e',
+                        isWeekend(subHeader) ? 'text-primary-300' : '',
+                        isToday(subHeader) ? 'bg-warning-100' : ''
+                      )}
+                      style={{ width: headerSize.width }}
+                    >
+                      {view === 'week' ? 'W' : ''}
+                      {formatDate(subHeader, subHeaderFormat || '')}
+                    </span>
+                  ))}
+                </div>
+              ) : null}
+            </div>
             <div
               className={clsx(
                 'border-grey-200 flex-1 border-r',

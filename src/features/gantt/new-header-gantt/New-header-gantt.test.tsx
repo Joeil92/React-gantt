@@ -39,6 +39,7 @@ function renderNewHeaderGantt() {
     <NewHeaderGantt
       headers={ganttHeaders}
       onHeadersChange={mockOnHeadersChange}
+      headerHeight={60}
     />
   )
   return { ...renderResult, ...user }
