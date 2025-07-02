@@ -1,5 +1,5 @@
 import { cva, type VariantProps } from 'class-variance-authority'
-import type { TableHTMLAttributes } from 'react'
+import type { TableHTMLAttributes, ThHTMLAttributes } from 'react'
 
 interface TableProps extends TableHTMLAttributes<HTMLTableElement> {
   children: React.ReactNode
@@ -22,7 +22,13 @@ function TableHeader({ children, ...props }: TableHeaderProps) {
 }
 
 interface TableHeadProps
-  extends Omit<TableHTMLAttributes<HTMLTableCellElement>, 'align'>,
+  extends Omit<
+      React.DetailedHTMLProps<
+        ThHTMLAttributes<HTMLTableHeaderCellElement>,
+        HTMLTableHeaderCellElement
+      >,
+      'align'
+    >,
     VariantProps<typeof tableHead> {
   children: React.ReactNode
 }
