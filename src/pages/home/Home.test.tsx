@@ -3,7 +3,7 @@ import { render } from '@testing-library/react'
 import Home from './Home'
 
 describe('Home', () => {
-  it('shoould be rendered', () => {
+  it('should be rendered', () => {
     render(<Home />)
   })
 })

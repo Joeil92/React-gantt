@@ -1,0 +1,100 @@
+import { CircleX, Filter } from 'lucide-react'
+import type { GanttHeader } from '../../../entities/gantt-header/gantt-header.types'
+import { useSortable } from '@dnd-kit/sortable'
+import { CSS } from '@dnd-kit/utilities'
+import { ResizableContainer } from '../../../shared/ui/resizable-container/Resizable-container.ui'
+import {
+  ContextMenu,
+  ContextMenuItem,
+  ContextMenuList,
+  ContextMenuToggle,
+} from '../../../shared/ui/context-menu/Context-menu.ui'
+
+type HeaderGanttProps = {
+  header: GanttHeader
+  headerSize: {
+    height: number
+    width: number
+  }
+  isResizing?: boolean
+  onResizingChange?: (isResizing: boolean) => void
+  headers: GanttHeader[]
+  onHeadersChange: (headers: GanttHeader[]) => void
+}
+export function HeaderGantt({
+  header,
+  isResizing,
+  onResizingChange,
+  headers,
+  headerSize,
+  onHeadersChange,
+}: HeaderGanttProps) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transition,
+    transform,
+    isDragging,
+  } = useSortable({
+    id: header.field,
+  })
+
+  const style: React.CSSProperties = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    ...(isDragging &&
+      !isResizing && {
+        opacity: 0.5,
+      }),
+    minWidth: header.width,
+    maxWidth: header.width,
+    height: headerSize.height,
+  }
+
+  const onResize = (width: number) => {
+    const updatedHeaders = headers.map((h) =>
+      h.field === header.field ? { ...header, width } : h
+    )
+    onHeadersChange(updatedHeaders)
+  }
+
+  const onHiddingHeader = () => {
+    const updatedHeaders = headers.map((h) =>
+      h.field === header.field ? { ...header, isVisible: false } : h
+    )
+    onHeadersChange(updatedHeaders)
+  }
+
+  return (
+    <div
+      className="group hover:bg-grey-100 text-grey-900 border-grey-200 cursor-pointer border-b text-[16px] leading-[24px] first:border-s last:border-e"
+      ref={setNodeRef}
+      style={style}
+      {...attributes}
+      {...listeners}
+    >
+      <ResizableContainer
+        minWidth={100}
+        onResize={onResize}
+        onResizeStart={() => onResizingChange?.(true)}
+        onResizeEnd={() => onResizingChange?.(false)}
+      >
+        <ContextMenu>
+          <ContextMenuToggle className="flex items-center justify-between gap-4 p-4">
+            <span>{header.label}</span>
+            <span className="text-grey-500 invisible group-hover:visible">
+              <Filter className="h-4 w-4" />
+            </span>
+          </ContextMenuToggle>
+          <ContextMenuList>
+            <ContextMenuItem onClick={onHiddingHeader}>
+              <CircleX className="h-4 w-4" />
+              Cacher la colonne
+            </ContextMenuItem>
+          </ContextMenuList>
+        </ContextMenu>
+      </ResizableContainer>
+    </div>
+  )
+}
